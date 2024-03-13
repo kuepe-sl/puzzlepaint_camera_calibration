@@ -16,8 +16,15 @@ if (CMAKE_CUDA_COMPILER)
     POSITION_INDEPENDENT_CODE ON
   )
   
-  # Packaged third-party library: YAML-CPP
-  add_subdirectory(third_party/yaml-cpp-0.6.0)
+  find_package(yaml-cpp REQUIRED)
+  option(SYSTEM_YAML_CPP "use system libpng" ${yaml-cpp_FOUND})
+  if(SYSTEM_YAML_CPP)
+    # libpng (external)
+    find_package(yaml-cpp REQUIRED)
+  else()
+    # Packaged third-party library: yaml-cpp 0.6.0
+    add_subdirectory(third_party/yaml-cpp-0.6.0)
+  endif()
 
   # Find external library librealsense2 for live RealSense camera support
   find_package(realsense2)
@@ -167,7 +174,6 @@ if (CMAKE_CUDA_COMPILER)
     src
     ${CERES_INCLUDE_DIRS}
     third_party/apriltag
-    third_party/yaml-cpp-0.6.0/include
     ${OpenCV_INCLUDE_DIRS}
   )
   if (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11)
@@ -183,7 +189,7 @@ if (CMAKE_CUDA_COMPILER)
     CUDA::cublas
     opengv
     camera_calibration_apriltag
-    yaml-cpp2
+    yaml-cpp::yaml-cpp
     ${OpenCV_LIBS}
     Qt5::Widgets
     ${Boost_LIBRARIES}
@@ -221,12 +227,11 @@ if (CMAKE_CUDA_COMPILER)
   )
   target_include_directories(camera_calibration PRIVATE
     src
-    third_party/yaml-cpp-0.6.0/include
   )
   target_link_libraries(camera_calibration PRIVATE
     camera_calibration_baselib
     ${Boost_LIBRARIES}
-    yaml-cpp2
+    yaml-cpp::yaml-cpp
     libvis_external_io
   )
   set_target_properties(camera_calibration PROPERTIES
@@ -264,11 +269,10 @@ if (CMAKE_CUDA_COMPILER)
     camera_calibration_baselib
     GTest::gtest
     pthread
-    yaml-cpp2
+    yaml-cpp::yaml-cpp
   )
   target_include_directories(camera_calibration_test PRIVATE
     src
-    third_party/yaml-cpp-0.6.0/include
   )
   add_test(camera_calibration_test
     camera_calibration_test

@@ -80,6 +80,7 @@ The following external dependencies are required.
 | [OpenGV](https://github.com/laurentkneip/opengv) | commit 306a54e | see submodule |
 | [Qt](https://www.qt.io/) | 5.12.0; minimum version: 5.8 | 5.15.8 |
 | [SuiteSparse](http://faculty.cse.tamu.edu/davis/suitesparse.html) | 4.2.1 | 5.10.1 |
+| [yaml-cpp](https://github.com/jbeder/yaml-cpp) | 0.6.0 (included) | 0.8.0 |
 | [zlib](https://zlib.net/) | - | 1.2.13 |
 
 The following external dependencies are optional.
@@ -93,7 +94,7 @@ The following external dependencies are optional.
 After obtaining all dependencies, the application can be built with CMake.
 
 When using Conda Forge, the following packages should be installed:
-- `gxx=11 cmake make cudatoolkit=11 cudatoolkit-dev=11 boost eigen glew qt suitesparse zlib libpng mesa-libgl-devel-cos7-x86_64`
+- `gxx=11 cmake make cudatoolkit=11 cudatoolkit-dev=11 boost eigen glew qt suitesparse zlib libpng gtest yaml-cpp mesa-libgl-devel-cos7-x86_64`
 
 Example build process:
 
