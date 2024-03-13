@@ -64,34 +64,51 @@ If you use the provided code for research, please cite the paper describing the 
 
 ## Building ##
 
-Building has been tested on Ubuntu 14.04 and Ubuntu 18.04 (with gcc).
+Building has been tested on Ubuntu 14.04 and Ubuntu 18.04 (with gcc), as well as GCC 11 via Conda Forge on Ubuntu 23.10.
 
 The following external dependencies are required.
 
-| Dependency   | Version(s) known to work |
-| ------------ | ------------------------ |
-| [Boost](https://www.boost.org/) | 1.54.0 |
-| [CUDA](https://developer.nvidia.com/cuda-downloads) | 10.1 |
-| [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) | 3.3.7 |
-| [GLEW](http://glew.sourceforge.net/build.html) | 1.10.0 |
-| [OpenGV](https://github.com/laurentkneip/opengv) | Commit 306a54e6c6b94e2048f820cdf77ef5281d4b48ad |
-| [Qt](https://www.qt.io/) | 5.12.0; minimum version: 5.8 |
-| [SuiteSparse](http://faculty.cse.tamu.edu/davis/suitesparse.html) | 4.2.1 |
-| [zlib](https://zlib.net/) | - |
+| Dependency   | Ubuntu 14.04 | Conda Forge |
+| ------------ | ------------ | ----------- |
+| [GCC](https://gcc.gnu.org/) | 4.8.2 | 11.4.0 |
+| [Boost](https://www.boost.org/) | 1.54.0 | 1.84.0 |
+| [CUDA](https://developer.nvidia.com/cuda-downloads) | 10.1 | 11.7 |
+| [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) | 3.3.7 | 3.4.0 |
+| [GLEW](http://glew.sourceforge.net/build.html) | 1.10.0 | 2.1.0 |
+| [OpenGV](https://github.com/laurentkneip/opengv) | commit 306a54e | see submodule |
+| [Qt](https://www.qt.io/) | 5.12.0; minimum version: 5.8 | 5.15.8 |
+| [SuiteSparse](http://faculty.cse.tamu.edu/davis/suitesparse.html) | 4.2.1 | 5.10.1 |
+| [zlib](https://zlib.net/) | - | 1.2.13 |
 
 The following external dependencies are optional.
 
 | Dependency   | Purpose |
 | ------------ | ------- | 
+| Video4Linux | Live input from various camera sources on Linux. |
 | [librealsense2](https://github.com/IntelRealSense/librealsense) | Live input from RealSense D400 series depth cameras (tested with the D435 only). |
 | [Structure SDK](https://structure.io/developers) | Live input from Structure Core cameras (tested with the color version only). To use this, set the SCSDK_ROOT CMake variable to the SDK path. |
 
-After obtaining all dependencies, the application can be built with CMake, for example as follows:
+After obtaining all dependencies, the application can be built with CMake.
+
+Example build process:
 
 ```bash
+git clone https://github.com/kuepe-sl/puzzlepaint_camera_calibration.git puzzlepaint
+cd puzzlepaint
+git submodule update --init
+
+# build OpenGV
+cd opengv
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CUDA_FLAGS="-arch=sm_61" ..
+cmake .. -DBUILD_PYTHON=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
+make -j4
+cd ../..
+
+# build camera calibration
+mkdir build
+cd build
+cmake .. -Dopengv_DIR="$PWD/../opengv/build" -DCMAKE_BUILD_TYPE=Release
 make -j camera_calibration  # Reduce the number of threads if running out of memory, e.g., -j3
 ```
 
