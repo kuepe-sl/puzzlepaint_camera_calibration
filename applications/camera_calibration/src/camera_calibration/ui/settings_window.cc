@@ -28,13 +28,6 @@
 
 #include "camera_calibration/ui/settings_window.h"
 
-#include <libv4l2.h>
-#include <linux/videodev2.h>
-#include <fcntl.h>
-#include <libvis/logging.h>
-#include <sstream>
-#include <sys/ioctl.h>
-
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFileDialog>

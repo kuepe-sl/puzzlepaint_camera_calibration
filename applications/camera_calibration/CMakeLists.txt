@@ -21,15 +21,20 @@ if (CMAKE_CUDA_COMPILER)
 
   # Find external library librealsense2 for live RealSense camera support
   find_package(realsense2)
-  if (realsense2_FOUND)
-    add_definitions(-DHAVE_REALSENSE)
-  endif()
   
   # Find external library Structure SDK for live Structure Core camera support
   find_package(Structure)
   
   # Find external library OpenGV
   find_package(opengv REQUIRED)
+
+  find_path(V4L2_INCLUDE_DIR NAMES libv4l2.h)
+  find_library(V4L2_LIBRARY NAMES v4l2)
+  if(V4L2_INCLUDE_DIR AND V4L2_LIBRARY)
+    set(V4L2_FOUND ON)
+  else()
+    set(V4L2_FOUND OFF)
+  endif()
 
 
   # Base library for both the main executable and the unit test executable
@@ -163,7 +168,6 @@ if (CMAKE_CUDA_COMPILER)
     ${CERES_INCLUDE_DIRS}
     third_party/apriltag
     third_party/yaml-cpp-0.6.0/include
-    ${realsense_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
   )
   if (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11)
@@ -181,12 +185,20 @@ if (CMAKE_CUDA_COMPILER)
     camera_calibration_apriltag
     yaml-cpp2
     ${OpenCV_LIBS}
-    ${realsense2_LIBRARY}
     Qt5::Widgets
     ${Boost_LIBRARIES}
-    v4l2
     X11
   )
+  if(realsense2_FOUND)
+    target_include_directories(camera_calibration_baselib PRIVATE ${realsense_INCLUDE_DIR})
+    target_link_libraries(camera_calibration_baselib PUBLIC ${realsense2_LIBRARY})
+    target_compile_definitions(camera_calibration_baselib PUBLIC HAVE_REALSENSE)
+  endif()
+  if(V4L2_FOUND)
+    target_include_directories(camera_calibration_baselib PRIVATE ${V4L2_INCLUDE_DIR})
+    target_link_libraries(camera_calibration_baselib PUBLIC ${V4L2_LIBRARY})
+    target_compile_definitions(camera_calibration_baselib PUBLIC HAVE_V4L2)
+  endif()
   
   if (TARGET StructurePrebuilt)
     target_link_libraries(camera_calibration_baselib PUBLIC

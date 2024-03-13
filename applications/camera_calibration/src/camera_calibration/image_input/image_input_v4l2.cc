@@ -32,18 +32,21 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#ifdef HAVE_V4L2
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <linux/videodev2.h>
 #include <libv4l2.h>
+#endif
 #include <libvis/logging.h>
 
 #include "camera_calibration/image_input/image_input_v4l2.h"
 
 namespace vis {
 
+#ifdef HAVE_V4L2
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
 struct buffer {
@@ -64,6 +67,7 @@ static bool xioctl(int fh, int request, void* arg) {
   }
   return true;
 }
+#endif // HAVE_V4L2
 
 
 struct AvailableInputV4L2 : public AvailableInput {
@@ -87,6 +91,9 @@ ImageInputV4L2::~ImageInputV4L2() {
 }
 
 void ImageInputV4L2::ListAvailableInputs(vector<shared_ptr<AvailableInput>>* list) {
+#ifndef HAVE_V4L2
+  (void) list;
+#else
   int camera_index = 0;
   while (true) {
     ostringstream filename;
@@ -125,6 +132,7 @@ void ImageInputV4L2::ListAvailableInputs(vector<shared_ptr<AvailableInput>>* lis
     
     ++ camera_index;
   }
+#endif // HAVE_V4L2
 }
 
 QWidget* ImageInputV4L2::CreateSettingsWidgets() {
@@ -162,6 +170,10 @@ void LogError(int error_code) {
 }
 
 void ImageInputV4L2::ThreadMain(const string& path) {
+#ifndef HAVE_V4L2
+  (void) path;
+  LOG(ERROR) << "Attempting to use V4L2 input, but the binary was compiled without video2linux.";
+#else
   int result;
   
   int fd = v4l2_open(path.c_str(), O_RDWR | O_NONBLOCK, 0);
@@ -375,6 +387,7 @@ void ImageInputV4L2::ThreadMain(const string& path) {
     v4l2_munmap(buffers[i].start, buffers[i].length);
   }
   v4l2_close(fd);
+#endif // HAVE_V4L2
 }
 
 }
