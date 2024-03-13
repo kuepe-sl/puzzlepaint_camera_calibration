@@ -17,6 +17,9 @@ if(MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-shlib-undefined")
+endif()
 
 # Make CMake find the Find<Package>.cmake files in the cmake subdirectory.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
@@ -114,8 +117,15 @@ endif()
 enable_testing()
 
 # libpng (packaged)
-add_subdirectory(libvis/third_party/libpng)
-set_target_properties(png png_static genfiles genprebuilt gensym genvers symbol-check PROPERTIES FOLDER "libvis/third_party/png")
+find_package(PNG)
+option(SYSTEM_PNG "use system libpng" ${PNG_FOUND})
+if(SYSTEM_PNG)
+  find_package(PNG REQUIRED)
+else()
+  add_subdirectory(libvis/third_party/libpng)
+  set_target_properties(png png_static genfiles genprebuilt gensym genvers symbol-check PROPERTIES FOLDER "libvis/third_party/png")
+  add_library(PNG::PNG ALIAS png)
+endif()
 
 # GLEW (external, required)
 find_package(GLEW REQUIRED)
@@ -395,7 +405,7 @@ target_link_libraries(libvis
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARY}
     ${Qt5X11Extras_LIBRARIES}
-    png  #_static
+    PNG::PNG
     Threads::Threads
 )
 if(VULKAN_FOUND)

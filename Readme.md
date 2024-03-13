@@ -90,6 +90,9 @@ The following external dependencies are optional.
 
 After obtaining all dependencies, the application can be built with CMake.
 
+When using Conda Forge, the following packages should be installed:
+- `gxx=11 cmake make cudatoolkit=11 cudatoolkit-dev=11 boost eigen glew qt suitesparse zlib libpng mesa-libgl-devel-cos7-x86_64`
+
 Example build process:
 
 ```bash
