@@ -104,24 +104,38 @@ target_link_libraries(loguru
   ${CMAKE_DL_LIBS}
 )
 
-# GTest (packaged)
-add_subdirectory(libvis/third_party/gtest)
-set_target_properties(gtest gtest_main PROPERTIES FOLDER "libvis/third_party")
+# Sophus v0.9 (packaged)
+set(SOPHUS_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libvis/third_party/sophus" CACHE PATH "Sophus include path")
 
-if(MSVC)
-  if (MSVC_VERSION GREATER_EQUAL 1900)
-    target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+find_package(GTest)
+option(SYSTEM_GTEST "use system libpng" ${GTest_FOUND})
+if(SYSTEM_GTEST)
+  # GTest (external)
+  find_package(GTest REQUIRED)
+else()
+  # GTest 1.7.0 (packaged)
+  add_subdirectory(libvis/third_party/gtest)
+  set_target_properties(gtest gtest_main PROPERTIES FOLDER "libvis/third_party")
+  set_target_properties(gtest PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${gtest_SOURCE_DIR}/include")
+
+  if(MSVC)
+    if (MSVC_VERSION GREATER_EQUAL 1900)
+      target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+      target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+    endif()
   endif()
+  add_library(GTest::gtest ALIAS gtest)
+  add_library(GTest::gtest_main ALIAS gtest_main)
 endif()
 enable_testing()
 
-# libpng (packaged)
 find_package(PNG)
 option(SYSTEM_PNG "use system libpng" ${PNG_FOUND})
 if(SYSTEM_PNG)
+  # libpng (external)
   find_package(PNG REQUIRED)
 else()
+  # libpng 1.6.37 (packaged)
   add_subdirectory(libvis/third_party/libpng)
   set_target_properties(png png_static genfiles genprebuilt gensym genvers symbol-check PROPERTIES FOLDER "libvis/third_party/png")
   add_library(PNG::PNG ALIAS png)
@@ -371,13 +385,11 @@ target_include_directories(libvis
   PUBLIC
     ${EIGEN3_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
-    libvis/third_party/sophus
+    ${SOPHUS_INCLUDE_DIR}
     ./libvis/src
   PRIVATE
     ${PCL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
-    ${gtest_SOURCE_DIR}/include
-    ${gtest_SOURCE_DIR}
     libvis/third_party
     ${GLEW_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -424,7 +436,7 @@ add_library(libvis_external_io SHARED
   libvis/src/libvis/external_io/meshlab_project.cc
   libvis/src/libvis/external_io/meshlab_project.h
   
-  libvis/third_party/tinyxml2/tinyxml2.cpp
+  libvis/third_party/tinyxml2/tinyxml2.cpp	# tinyxml2 v3.0.0
 )
 set_property(TARGET libvis_external_io PROPERTY FOLDER "libvis")
 target_compile_options(libvis_external_io PRIVATE
@@ -437,7 +449,7 @@ target_link_libraries(libvis_external_io PUBLIC
 )
 target_include_directories(libvis_external_io PUBLIC
   ${Boost_INCLUDE_DIR}
-  libvis/third_party/
+  libvis/third_party/	# for tinyxml2 and rapidjson
 )
 
 
@@ -500,14 +512,12 @@ if (CMAKE_CUDA_COMPILER)
     libvis/src/libvis/cuda/test/main.cc
   )
   target_link_libraries(libvis_cuda_test PRIVATE
-    gtest_main
+    GTest::gtest_main
     Threads::Threads
     libvis_cuda
     CUDA::cublas  # TODO: currently required because of lm_optimizer.h. That should not be necessary.
   )
   target_include_directories(libvis_cuda_test PRIVATE
-    ${gtest_SOURCE_DIR}/include
-    #${gtest_SOURCE_DIR}
     ${OpenCV_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}  # TODO: currently required because of lm_optimizer.h. That should not be necessary.
@@ -541,14 +551,12 @@ add_executable(libvis_test
 )
 set_property(TARGET libvis_test PROPERTY FOLDER "libvis")
 target_link_libraries(libvis_test PRIVATE
-  gtest
+  GTest::gtest_main
   Threads::Threads
   libvis
   CUDA::cublas  # TODO: currently required because of lm_optimizer.h. That should not be necessary.
 )
 target_include_directories(libvis_test PRIVATE
-  ${gtest_SOURCE_DIR}/include
-  #${gtest_SOURCE_DIR}
   ${OpenCV_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIRS}
   ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}  # TODO: currently required because of lm_optimizer.h. That should not be necessary.

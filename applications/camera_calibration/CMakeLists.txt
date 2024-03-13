@@ -262,14 +262,12 @@ if (CMAKE_CUDA_COMPILER)
   add_dependencies(camera_calibration_test camera_calibration_test_resources)
   target_link_libraries(camera_calibration_test
     camera_calibration_baselib
-    gtest
+    GTest::gtest
     pthread
     yaml-cpp2
   )
   target_include_directories(camera_calibration_test PRIVATE
     src
-    ${gtest_SOURCE_DIR}/include
-    ${gtest_SOURCE_DIR}
     third_party/yaml-cpp-0.6.0/include
   )
   add_test(camera_calibration_test

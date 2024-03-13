@@ -75,6 +75,8 @@ The following external dependencies are required.
 | [CUDA](https://developer.nvidia.com/cuda-downloads) | 10.1 | 11.7 |
 | [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) | 3.3.7 | 3.4.0 |
 | [GLEW](http://glew.sourceforge.net/build.html) | 1.10.0 | 2.1.0 |
+| [GoogleTest](https://google.github.io/googletest/) | 1.7.0 (included) | 1.14.0 |
+| [libpng](http://www.libpng.org/pub/png/libpng.html) | 1.6.37 (included) | 1.6.43 |
 | [OpenGV](https://github.com/laurentkneip/opengv) | commit 306a54e | see submodule |
 | [Qt](https://www.qt.io/) | 5.12.0; minimum version: 5.8 | 5.15.8 |
 | [SuiteSparse](http://faculty.cse.tamu.edu/davis/suitesparse.html) | 4.2.1 | 5.10.1 |
@@ -113,6 +115,9 @@ mkdir build
 cd build
 cmake .. -Dopengv_DIR="$PWD/../opengv/build" -DCMAKE_BUILD_TYPE=Release
 make -j camera_calibration  # Reduce the number of threads if running out of memory, e.g., -j3
+
+# run executable
+./applications/camera_calibration/camera_calibration
 ```
 
 If you intend to use the depth estimation or live feature detection functionalities,
