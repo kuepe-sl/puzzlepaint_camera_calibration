@@ -95,6 +95,7 @@ After obtaining all dependencies, the application can be built with CMake.
 
 When using Conda Forge, the following packages should be installed:
 - `gxx=11 cmake make cudatoolkit=11 cudatoolkit-dev=11 boost eigen glew qt suitesparse zlib libpng gtest yaml-cpp mesa-libgl-devel-cos7-x86_64`
+- Note that Conda Forge doesn't have *libv4l2*. In order to use the GUI for capturing images, you will need to build and install libv4l2 before building the camera calibration application. (see the section later in the file)
 
 Example build process:
 
@@ -128,6 +129,18 @@ you only intend to run the compiled application on the system it was compiled on
 architectures (in case the compiled application is intended for distribution).
 See the [corresponding CUDA documentation](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#options-for-steering-gpu-code-generation-gpu-architecture).
 
+Building/installing libv4l2 manually (for builds with Conda toolchain):
+
+```bash
+conda install meson ninja
+wget "https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.26.1.tar.xz"
+tar -xf v4l-utils-1.26.1.tar.xz
+cd v4l-utils-1.26.1
+sed -i -e "s/\\('[^']*' : ir_bpf_enabled\\)/#\1/" meson.build
+meson setup --prefix $CONDA_PREFIX --libdir lib -D v4l-utils=false build/
+meson compile -C build/
+meson install -C build/
+```
 
 
 ## How to use ##
